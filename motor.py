@@ -6,12 +6,14 @@ DXL_MINIMUM_POSITION_VALUE  = 0
 DXL_MAXIMUM_POSITION_VALUE  = 4095     
 
 # Macros
-TORQUE_ENABLE               = 1     # Value for enabling the torque
-TORQUE_DISABLE              = 0     # Value for disabling the torque
+TORQUE_ENABLE               = 1  
+TORQUE_DISABLE              = 0  
 
 class Motor:
 
     def __init__(self, ID, packetHandler, portHandler):
+        '''
+        '''
         self.ID = ID
         self.packetHandler = packetHandler
         self.portHandler = portHandler
@@ -19,7 +21,7 @@ class Motor:
         self.velocity_speed = 256
 
         self.set_control_mode_position()
-        self.disable_torque()
+        # self.disable_torque()
 
     # Move commands
     def move_to_possition(self, goal_position):
