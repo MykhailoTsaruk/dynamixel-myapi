@@ -47,7 +47,7 @@ class Motor:
     
     def move_use_velocity(self, direction):
         '''
-        :param direction: Direction.CW or Direction.CCW
+        :param direction: Direction.CW (1) or Direction.CCW (0) Any other number ex. -1 for STOP
         '''
         # TODO: add description
         if self.present_control_mode == ControlMode.VELOCITY:
