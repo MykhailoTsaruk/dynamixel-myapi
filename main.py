@@ -2,17 +2,12 @@ from enums import *
 from motor import *
 from dynamixel_sdk import *
 
-DEVICENAME              = '/dev/ttyUSB0'
+DEVICENAME              = 'COM3'
 PROTOCOL_VERSION        = 2.0
-LEN_GOAL_POSITION       = 4
-LEN_PRESENT_POSITION    = 4
 BAUDRATE                = 57600
 
 portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
-
-groupSyncWrite = GroupSyncWrite(portHandler, packetHandler, Address.GOAL_POSITION, LEN_GOAL_POSITION)
-groupSyncRead = GroupSyncRead(portHandler, packetHandler, Address.PRESENT_POSITION, LEN_PRESENT_POSITION)
 
 # Open port
 if portHandler.openPort():
@@ -28,7 +23,19 @@ else:
     print("Failed to change the baudrate")
     quit()
 
-motors = {}
+motors = []
 
-for i in range(9):
-    motors[i] = Motor(i, packet_handler, port_handler)
+for i in range(1, 10, 1):
+    motors.append(Motor(i, packetHandler, portHandler))
+
+input()
+
+for motor in motors:
+    motor.move_to_possition(0)
+
+input()
+
+for motor in motors:
+    motor.disable_torque()
+
+portHandler.closePort()

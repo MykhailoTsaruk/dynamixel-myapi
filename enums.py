@@ -1,10 +1,8 @@
-from enum import Enum
-
-class Direction(Enum):
+class Direction():
     CW  = 1
     CCW = 0
 
-class ControlMode(Enum):
+class ControlMode():
     CURRENT             = 0
     VELOCITY            = 1
     POSITION            = 3
@@ -12,9 +10,10 @@ class ControlMode(Enum):
     CURRENT_BASED       = 5
     PWM                 = 16
 
-class Address(Enum):
-    OPERATING_MODE         = 11
-    TORQUE_ENABLE          = 64
-    GOAL_VELOCITY          = 104
-    GOAL_POSITION          = 116   
-    PRESENT_POSITION       = 132
+class Address():
+    ID                      = 7
+    OPERATING_MODE          = 11
+    TORQUE_ENABLE           = 64
+    GOAL_VELOCITY           = 104
+    GOAL_POSITION           = 116   
+    PRESENT_POSITION        = 132

@@ -23,6 +23,12 @@ class Motor:
         self.set_control_mode_position()
         # self.disable_torque()
 
+    def set_new_ID(self, new_ID : int):
+        if 0 <= new_ID <= 255:
+            dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxOnly(self.portHandler, self.ID, Address.ID, new_ID)
+            if self.check_error(dxl_comm_result, dxl_error):
+                self.ID = new_ID
+
     # Move commands
     def move_to_possition(self, goal_position):
         # TODO: add description
@@ -31,9 +37,9 @@ class Motor:
                 print(f"Goal position must be from {DXL_MINIMUM_POSITION_VALUE} to {DXL_MAXIMUM_POSITION_VALUE} \nbecause present control mode is POSITION")
                 return 0
             
+            print(f"Move from {self.get_present_possition()} to {goal_position}")
             dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.ID, Address.GOAL_POSITION, goal_position)
             self.check_error(dxl_comm_result, dxl_error)
-            print(f"Move from {self.get_present_possition} to {goal_position}")
             return 1
         else:
             print(f"Control mode must be POSITION or EXTENDED_POSITION \nPresent control mode: {self.present_control_mode}")
@@ -137,7 +143,7 @@ class Motor:
             self.present_control_mode = ControlMode.POSITION
         self.check_error(dxl_comm_result, dxl_error)
         self.enable_torque()
-        
+
     def set_control_mode_extended_position(self):
         self.disable_torque()
         dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.ID, Address.OPERATING_MODE, ControlMode.EXTENDED_POSITION)
