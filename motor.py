@@ -1,5 +1,7 @@
 from dynamixel_sdk import *
 from enums import *
+from math import pi
+from cord import Cord
 
 # Initialisation constants
 DXL_MINIMUM_POSITION_VALUE  = 0        
@@ -11,17 +13,43 @@ TORQUE_DISABLE              = 0
 
 class Motor:
 
-    def __init__(self, ID, packetHandler, portHandler):
+    def __init__(self, ID, packetHandler, portHandler, resolution=4096, c_radius=10, 
+                previous_position=0, turn=0):
         '''
         '''
-        self.ID = ID
-        self.packetHandler = packetHandler
-        self.portHandler = portHandler
-        self.present_control_mode = ControlMode.POSITION
-        self.velocity_speed = 256
+        self.ID                     = ID
+        self.packetHandler          = packetHandler
+        self.portHandler            = portHandler
 
-        self.set_control_mode_position()
+        self.present_control_mode   = ControlMode.POSITION
+        self.velocity_speed         = 256
+        
+        self.resolution             = resolution
+        
+        self.c_radius               = c_radius
+        self.c_length               = 2 * pi * self.c_radius
+        self.one_pulse              = self.c_length / self.resolution
+        
+        self.previous_position      = previous_position
+        self.turn                   = turn
+
+        self.set_control_mode_extended_position()
         # self.disable_torque()
+
+    # Calculate how many revolutions servo needs to make 
+    def calculate_servo_rotation(self, current_length : float, new_length : float):
+        length = current_length - new_length
+
+        return int(length / self.one_pulse)
+    
+    # Calcute new servo position
+    def calculate_servo_position(self, current_length : float, new_length : float):
+        servo_rotation = self.calculate_servo_rotation(current_length=current_length, new_length=new_length)
+
+        new_servo_position = self.get_present_position + servo_rotation
+
+        return new_servo_position
+    
 
     def set_new_ID(self, new_ID : int):
         if 0 <= new_ID <= 255:
@@ -30,14 +58,14 @@ class Motor:
                 self.ID = new_ID
 
     # Move commands
-    def move_to_possition(self, goal_position):
+    def move_to_position(self, goal_position):
         # TODO: add description
         if self.present_control_mode == ControlMode.POSITION or self.present_control_mode == ControlMode.EXTENDED_POSITION:
             if self.present_control_mode == ControlMode.POSITION and (goal_position < DXL_MINIMUM_POSITION_VALUE or goal_position > DXL_MAXIMUM_POSITION_VALUE): 
                 print(f"Goal position must be from {DXL_MINIMUM_POSITION_VALUE} to {DXL_MAXIMUM_POSITION_VALUE} \nbecause present control mode is POSITION")
                 return 0
             
-            print(f"Move from {self.get_present_possition()} to {goal_position}")
+            print(f"Move from {self.get_present_position()} to {goal_position}")
             dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.ID, Address.GOAL_POSITION, goal_position)
             self.check_error(dxl_comm_result, dxl_error)
             return 1
@@ -100,7 +128,7 @@ class Motor:
     def get_velocity_speed(self):
         return self.velocity_speed
     
-    def get_present_possition(self):
+    def get_present_position(self):
         dxl_present_position, dxl_comm_result, dxl_error = self.packetHandler.read4ByteTxRx(self.portHandler, self.ID, Address.PRESENT_POSITION)
         self.check_error(dxl_comm_result, dxl_error)
         
@@ -118,6 +146,13 @@ class Motor:
         else:
             print("New velocity speed must be from 1 to 1023!")
             return 0
+        
+    def set_homing_offset(self, offset : int):
+        dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, self.ID, Address.HOMING_OFFSET, offset)
+        if dxl_error == 0: 
+            pass
+        self.check_error(dxl_comm_result, dxl_error)
+
 
     # Control mods
     def set_control_mode_current(self):
@@ -167,4 +202,3 @@ class Motor:
             self.present_control_mode = ControlMode.PWM
         self.check_error(dxl_comm_result, dxl_error)
         self.enable_torque()
-

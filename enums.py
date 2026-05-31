@@ -13,6 +13,7 @@ class ControlMode():
 class Address():
     ID                      = 7
     OPERATING_MODE          = 11
+    HOMING_OFFSET           = 20
     TORQUE_ENABLE           = 64
     GOAL_VELOCITY           = 104
     GOAL_POSITION           = 116   

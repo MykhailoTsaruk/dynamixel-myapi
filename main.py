@@ -26,7 +26,7 @@ else:
 motors = []
 
 for i in range(1, 10, 1):
-    motors.append(Motor(i, packetHandler, portHandler))
+    motors.append(Motor(ID=i, packetHandler=packetHandler, portHandler=portHandler))
 
 input()
 
